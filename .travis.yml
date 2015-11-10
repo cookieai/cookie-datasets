@@ -1,5 +1,8 @@
 language: scala
 scala:
-  - 2.10.4
+  - 2.10.5
 jdk:
   - oraclejdk8
+cache:
+  directories:
+    - $HOME/.m2
