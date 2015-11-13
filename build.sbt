@@ -66,9 +66,12 @@ releaseProcess := Seq[ReleaseStep](
  ********************/
 sparkComponents := Seq("sql", "mllib")
 libraryDependencies ++= Seq(
+  "org.apache.spark" %% "spark-core" % sparkVersion.value,
   "org.apache.spark" %% "spark-sql" % sparkVersion.value,
   "org.apache.spark" %% "spark-mllib" % sparkVersion.value
 )
+
+// note that the below dependencies refer to the '-test' jars
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.5" % Test,
   "org.apache.spark" %% "spark-core" % sparkVersion.value % Test classifier "tests",
