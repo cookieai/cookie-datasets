@@ -2,6 +2,7 @@
 # cookie-datasets
 
 [![Join the chat at https://gitter.im/cookieai/cookie-datasets](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cookieai/cookie-datasets?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![Build Status](https://travis-ci.org/cookieai/cookie-datasets.svg?branch=master)](https://travis-ci.org/cookieai/cookie-datasets)
 
 The cookie-datasets library provides various DataFrame readers for Apache Spark.
 
