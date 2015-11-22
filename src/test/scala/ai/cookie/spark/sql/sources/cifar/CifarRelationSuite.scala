@@ -63,19 +63,18 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
 
       println(df.schema.json)
 
-      def values(field: StructField) = {
+      def values(field: StructField): Array[String] = {
         Attribute.fromStructField(field) match {
-          case na: NominalAttribute => na.values
-          case _ => None
+          case na: NominalAttribute if na.values.isDefined => na.values.get
         }
       }
 
       format match {
         case CifarFormats._10 =>
-          values(df.schema("label")) should equal(Some(CifarFormats._10.labels))
+          values(df.schema("label")) should equal(CifarFormats._10.labels)
         case CifarFormats._100 =>
-          values(df.schema("label")) should equal(Some(CifarFormats._100.fineLabels))
-          values(df.schema("coarseLabel")) should equal(Some(CifarFormats._100.coarseLabels))
+          values(df.schema("label")) should equal(CifarFormats._100.fineLabels)
+          values(df.schema("coarseLabel")) should equal(CifarFormats._100.coarseLabels)
       }
 
       val featureMetadata = df.schema("features").metadata
@@ -88,7 +87,6 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
     for((format, path, count) <- testDatasets) {
       val df = sqlContext.read.cifar(path.toString, format.name)
 
-      //df.rdd.partitions.length shouldEqual 10
       df.count() shouldEqual count
       df.select("label").count() shouldEqual count
       df.select("features").count() shouldEqual count
@@ -119,7 +117,7 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
     for((format, path, count) <- testDatasets) {
       format match {
         case CifarFormats._10 =>
-          val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue /*30741338L*/))
+          val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue))
             .select("label", "features")
 
           implicit val parser = new CifarReader(path, format, true)
@@ -141,7 +139,7 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
           df.stat.freqItems(Seq("label")).show
 
         case CifarFormats._100 =>
-          val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue /*30741338L*/))
+          val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue))
             .select("coarseLabel", "label", "features")
 
           implicit val parser = new CifarReader(path, format, true)

@@ -30,9 +30,10 @@ package object iris {
     /**
       * Read an IRIS dataset.
       * @param path a Hadoop-style path to a file in IRIS format.
+      * @param format the format ("csv" or "libsvm").  Defaults to "csv".
       */
-    def iris(path: String): DataFrame =
-      read.format(classOf[DefaultSource].getName).load(path)
+    def iris(path: String, format: String = "csv"): DataFrame =
+      read.format(classOf[DefaultSource].getName).option(DefaultSource.Format, format).load(path)
   }
 }
 

@@ -18,7 +18,7 @@
 package ai.cookie.spark.sql.sources.iris
 
 import org.apache.hadoop.fs.Path
-import org.apache.spark.ml.attribute.{Attribute, NominalAttribute}
+import org.apache.spark.ml.attribute.{AttributeGroup, Attribute, NominalAttribute}
 import org.apache.spark.sql.test.SharedSQLContext
 import org.apache.spark.sql.types.StructField
 import ai.cookie.spark.sql.sources.DataSourceTest
@@ -27,58 +27,69 @@ import org.scalatest.{BeforeAndAfter, Matchers}
 class IrisRelationSuite extends DataSourceTest with SharedSQLContext
   with BeforeAndAfter with Matchers {
 
-  val path = new Path("src/test/resources/iris.libsvm")
-  val numExamples = 300
+  private val testDatasets = Seq(
+    ("csv", new Path("src/test/resources/iris.data"), 150),
+    ("libsvm", new Path("src/test/resources/iris.libsvm"), 300)
+  )
   
   override def beforeAll(): Unit = {
     super.beforeAll()
   }
 
   test("metadata") {
-    val df = sqlContext.read.iris(path.toString)
+    for((format, path, _) <- testDatasets) {
+      val df = sqlContext.read.iris(path.toString, format = format)
 
-    def values(field: StructField) = {
-      Attribute.fromStructField(field) match {
-        case na: NominalAttribute => na.values
-        case _ => None
+      def labels(field: StructField): Array[String] = {
+        Attribute.fromStructField(field) match {
+          case na: NominalAttribute if na.values.isDefined => na.values.get
+        }
       }
-    }
 
-    values(df.schema("label")) should equal (Some(IrisRelation.labels))
+      def features(field: StructField): Array[String] = {
+        AttributeGroup.fromStructField(field).attributes match {
+          case Some(a) => a.map(_.name.get)
+        }
+      }
+
+      labels(df.schema("label")) should equal (IrisRelation.labels)
+      features(df.schema("features")) should equal (IrisRelation.features)
+    }
   }
 
   test("select") {
-    val df = sqlContext.read.iris(path.toString)
+    for((format, path, numExamples) <- testDatasets) {
+      val df = sqlContext.read.iris(path.toString, format = format)
 
-    //df.rdd.partitions.length shouldEqual 10
-    df.count() shouldEqual numExamples
-    df.select("label").count() shouldEqual numExamples
-    df.select("features").count() shouldEqual numExamples
-    df.sample(false, 0.05).show()
+      df.count() shouldEqual numExamples
+      df.select("label").count() shouldEqual numExamples
+      df.select("features").count() shouldEqual numExamples
+      df.sample(false, 0.05).show()
+    }
   }
 
   test("sql datasource") {
-    sqlContext.sql(
-      s"""
-         |CREATE TEMPORARY TABLE iris
-         |USING ai.cookie.spark.sql.sources.iris
-         |OPTIONS (path "$path")
-      """.stripMargin)
+    for((format, path, numExamples) <- testDatasets) {
+      sqlContext.sql(
+        s"""
+           |CREATE TEMPORARY TABLE iris
+           |USING ai.cookie.spark.sql.sources.iris
+           |OPTIONS (path "$path", format "${format}")
+        """.stripMargin)
 
-    val df = sqlContext.sql("SELECT * FROM iris")
-    df.count() shouldEqual numExamples
-    df.sample(false, 0.05).show()
+      val df = sqlContext.sql("SELECT * FROM iris")
+      df.count() shouldEqual numExamples
+      df.sample(false, 0.05).show()
+    }
   }
 
   test("repeatability") {
-    val df =  sqlContext.read.iris(path.toString)
+    for((format, path, numExamples) <- testDatasets) {
+      val df = sqlContext.read.iris(path.toString, format = format)
 
-    df.count() shouldEqual numExamples
-    df.count() shouldEqual numExamples
+      df.count() shouldEqual numExamples
+      df.count() shouldEqual numExamples
+    }
   }
 
 }
-
-//class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndAfter {
-//
-//}
