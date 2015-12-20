@@ -80,5 +80,5 @@ libraryDependencies ++= Seq(
 // test dependencies
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.5" % Test,
-  "com.holdenkarau" %% "spark-testing-base" % "1.5.0_0.2.1" % Test
+  "com.holdenkarau" %% "spark-testing-base" % s"${sparkVersion.value}_0.2.1" % Test
 )
