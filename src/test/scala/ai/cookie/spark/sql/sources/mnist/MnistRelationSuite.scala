@@ -17,23 +17,18 @@
 
 package ai.cookie.spark.sql.sources.mnist
 
-import org.apache.hadoop.fs.Path
-import org.apache.spark.sql.test.SharedSQLContext
-import ai.cookie.spark.sql.sources.DataSourceTest
-
 import java.io.EOFException
-import java.nio.file.Paths
-import org.apache.spark.Logging
-import org.apache.spark.mllib.linalg.Vectors
-import org.apache.spark.mllib.linalg.{Vector => Vector}
-import org.scalatest.{BeforeAndAfter, Matchers, FunSuite}
-import ai.cookie.spark.sql.types.Conversions._
 
-import org.apache.hadoop.conf.Configuration
 import ai.cookie.spark.ml.attribute.AttributeKeys
+import ai.cookie.spark.sql.sources.SharedSQLContext
+import ai.cookie.spark.sql.types.Conversions._
+import org.apache.hadoop.conf.Configuration
+import org.apache.hadoop.fs.Path
+import org.apache.spark.mllib.linalg.Vector
+import org.scalatest.{FunSuite, Matchers}
 
-class MnistRelationSuite extends DataSourceTest with SharedSQLContext
-  with BeforeAndAfter with Matchers {
+class MnistRelationSuite extends FunSuite
+with SharedSQLContext with Matchers {
 
   val labels = new Path("src/test/resources/t10k-labels-idx1-ubyte")
   val images = new Path("src/test/resources/t10k-images-idx3-ubyte")
@@ -63,13 +58,6 @@ class MnistRelationSuite extends DataSourceTest with SharedSQLContext
     next()
   }
 
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-
-
-
-  }
-
   test("metadata") {
     val df = sqlContext.read.mnist(images.toString, labels.toString)
     val featureMetadata = df.schema("features").metadata
@@ -81,7 +69,6 @@ class MnistRelationSuite extends DataSourceTest with SharedSQLContext
   test("select") {
     val df = sqlContext.read.mnist(images.toString, labels.toString)
 
-    //df.rdd.partitions.length shouldEqual 10
     df.count() shouldEqual 10000
     df.select("label").count() shouldEqual 10000
     df.select("features").count() shouldEqual 10000
@@ -136,7 +123,3 @@ class MnistRelationSuite extends DataSourceTest with SharedSQLContext
   }
 
 }
-
-//class SaveLoadSuite extends DataSourceTest with SharedSQLContext with BeforeAndAfter {
-//
-//}

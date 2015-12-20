@@ -17,24 +17,19 @@
 
 package ai.cookie.spark.sql.sources.iris
 
+import ai.cookie.spark.sql.sources.SharedSQLContext
 import org.apache.hadoop.fs.Path
-import org.apache.spark.ml.attribute.{AttributeGroup, Attribute, NominalAttribute}
-import org.apache.spark.sql.test.SharedSQLContext
+import org.apache.spark.ml.attribute.{Attribute, AttributeGroup, NominalAttribute}
 import org.apache.spark.sql.types.StructField
-import ai.cookie.spark.sql.sources.DataSourceTest
-import org.scalatest.{BeforeAndAfter, Matchers}
+import org.scalatest.{FunSuite, Matchers}
 
-class IrisRelationSuite extends DataSourceTest with SharedSQLContext
-  with BeforeAndAfter with Matchers {
+class IrisRelationSuite extends FunSuite
+with SharedSQLContext with Matchers {
 
   private val testDatasets = Seq(
     ("csv", new Path("src/test/resources/iris.data"), 150),
     ("libsvm", new Path("src/test/resources/iris.libsvm"), 300)
   )
-  
-  override def beforeAll(): Unit = {
-    super.beforeAll()
-  }
 
   test("metadata") {
     for((format, path, _) <- testDatasets) {
@@ -49,6 +44,7 @@ class IrisRelationSuite extends DataSourceTest with SharedSQLContext
       def features(field: StructField): Array[String] = {
         AttributeGroup.fromStructField(field).attributes match {
           case Some(a) => a.map(_.name.get)
+          case None => Array()
         }
       }
 

@@ -18,9 +18,23 @@
 
 package ai.cookie.spark.sql.sources
 
-import org.apache.spark.SharedSparkContext
+import com.holdenkarau.spark.testing.SharedSparkContext
 import org.apache.spark.sql._
+import org.scalatest.Suite
 
-private[sql] abstract class DataSourceTest extends QueryTest {
+private[sql] abstract trait SharedSQLContext extends SharedSparkContext { self: Suite =>
 
+  @transient private var _sqlContext: SQLContext = _
+
+  def sqlContext: SQLContext = _sqlContext
+
+  override def beforeAll() {
+    super.beforeAll()
+    _sqlContext = new SQLContext(sc)
+  }
+
+  override def afterAll() {
+    _sqlContext = null
+    super.afterAll()
+  }
 }

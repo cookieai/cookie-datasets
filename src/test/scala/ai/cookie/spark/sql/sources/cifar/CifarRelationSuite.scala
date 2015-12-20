@@ -19,21 +19,19 @@ package ai.cookie.spark.sql.sources.cifar
 
 import java.io.EOFException
 
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
-import org.apache.spark.ml.attribute.{NominalAttribute, Attribute}
-import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.test.SharedSQLContext
-import org.apache.spark.sql.types.StructField
 import ai.cookie.spark.ml.attribute.AttributeKeys
 import ai.cookie.spark.ml.feature.IndexToString
-import ai.cookie.spark.sql.sources.DataSourceTest
-import org.scalatest.{BeforeAndAfter, Matchers}
+import ai.cookie.spark.sql.sources.SharedSQLContext
 import ai.cookie.spark.sql.types.Conversions._
+import org.apache.hadoop.fs.Path
+import org.apache.spark.ml.attribute.{Attribute, NominalAttribute}
+import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.types.StructField
+import org.scalatest.{FunSuite, Matchers}
 
-class CifarRelationSuite extends DataSourceTest with SharedSQLContext
-  with BeforeAndAfter with Matchers {
+class CifarRelationSuite extends FunSuite
+with SharedSQLContext with Matchers {
 
   private val testDatasets = Seq(
     (CifarFormats._100, new Path("src/test/resources/cifar-100-binary/sample.bin"), 100),
@@ -52,9 +50,6 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
     val t = new IndexToString()
     t.setInputCol("label").setOutputCol("labelName")
     t.transform(df).show(numRows = 10)
-  }
-  override def beforeAll(): Unit = {
-      super.beforeAll()
   }
 
   test("metadata") {
