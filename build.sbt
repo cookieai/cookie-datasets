@@ -19,6 +19,12 @@ sparkVersion := "1.5.0"
 autoAPIMappings := true
 
 /********************
+  * Test *
+  ********************/
+parallelExecution in Test := false
+fork := true
+
+/********************
  * Release settings *
  ********************/
 spAppendScalaVersion := true
@@ -71,10 +77,8 @@ libraryDependencies ++= Seq(
   "org.apache.spark" %% "spark-mllib" % sparkVersion.value
 )
 
-// note that the below dependencies refer to the '-test' jars
+// test dependencies
 libraryDependencies ++= Seq(
   "org.scalatest" %% "scalatest" % "2.2.5" % Test,
-  "org.apache.spark" %% "spark-core" % sparkVersion.value % Test classifier "tests",
-  "org.apache.spark" %% "spark-catalyst" % sparkVersion.value % Test classifier "tests",
-  "org.apache.spark" %% "spark-sql" % sparkVersion.value % Test classifier "tests"
+  "com.holdenkarau" %% "spark-testing-base" % s"${sparkVersion.value}_0.2.1" % Test
 )

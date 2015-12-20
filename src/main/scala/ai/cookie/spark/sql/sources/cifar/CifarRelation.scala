@@ -23,7 +23,7 @@ import java.nio.file.Paths
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.spark.annotation.{Experimental, AlphaComponent}
-import org.apache.spark.ml.attribute.NominalAttribute
+import org.apache.spark.ml.attribute.{AttributeGroup, NominalAttribute}
 import org.apache.spark.{SparkContext, Partition, TaskContext, Logging}
 import org.apache.spark.mllib.linalg.Vectors
 import org.apache.spark.rdd.RDD
@@ -84,7 +84,10 @@ private abstract class CifarRelation(
 
   protected lazy val featureMetadata = {
     val shape = CifarFormats.SHAPE
-    new MetadataBuilder().putLongArray(AttributeKeys.SHAPE, Array(shape._1, shape._2, shape._3)).build()
+    new MetadataBuilder()
+      .putLongArray(AttributeKeys.SHAPE, Array(shape._1, shape._2, shape._3))
+      .withMetadata(new AttributeGroup("features", shape._1 * shape._2 * shape._3).toMetadata())
+      .build()
   }
 
   override def buildScan(requiredColumns: Array[String]): RDD[Row] = {

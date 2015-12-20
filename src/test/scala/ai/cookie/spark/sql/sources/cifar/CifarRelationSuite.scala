@@ -19,21 +19,19 @@ package ai.cookie.spark.sql.sources.cifar
 
 import java.io.EOFException
 
-import org.apache.hadoop.conf.Configuration
-import org.apache.hadoop.fs.Path
-import org.apache.spark.ml.attribute.{NominalAttribute, Attribute}
-import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.sql.DataFrame
-import org.apache.spark.sql.test.SharedSQLContext
-import org.apache.spark.sql.types.StructField
 import ai.cookie.spark.ml.attribute.AttributeKeys
 import ai.cookie.spark.ml.feature.IndexToString
-import ai.cookie.spark.sql.sources.DataSourceTest
-import org.scalatest.{BeforeAndAfter, Matchers}
+import ai.cookie.spark.sql.sources.SharedSQLContext
 import ai.cookie.spark.sql.types.Conversions._
+import org.apache.hadoop.fs.Path
+import org.apache.spark.ml.attribute.{Attribute, NominalAttribute}
+import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.types.StructField
+import org.scalatest.{FunSuite, Matchers}
 
-class CifarRelationSuite extends DataSourceTest with SharedSQLContext
-  with BeforeAndAfter with Matchers {
+class CifarRelationSuite extends FunSuite
+with SharedSQLContext with Matchers {
 
   private val testDatasets = Seq(
     (CifarFormats._100, new Path("src/test/resources/cifar-100-binary/sample.bin"), 100),
@@ -53,9 +51,6 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
     t.setInputCol("label").setOutputCol("labelName")
     t.transform(df).show(numRows = 10)
   }
-  override def beforeAll(): Unit = {
-      super.beforeAll()
-  }
 
   test("metadata") {
     for((format, path, _) <- testDatasets) {
@@ -63,19 +58,18 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
 
       println(df.schema.json)
 
-      def values(field: StructField) = {
+      def values(field: StructField): Array[String] = {
         Attribute.fromStructField(field) match {
-          case na: NominalAttribute => na.values
-          case _ => None
+          case na: NominalAttribute if na.values.isDefined => na.values.get
         }
       }
 
       format match {
         case CifarFormats._10 =>
-          values(df.schema("label")) should equal(Some(CifarFormats._10.labels))
+          values(df.schema("label")) should equal(CifarFormats._10.labels)
         case CifarFormats._100 =>
-          values(df.schema("label")) should equal(Some(CifarFormats._100.fineLabels))
-          values(df.schema("coarseLabel")) should equal(Some(CifarFormats._100.coarseLabels))
+          values(df.schema("label")) should equal(CifarFormats._100.fineLabels)
+          values(df.schema("coarseLabel")) should equal(CifarFormats._100.coarseLabels)
       }
 
       val featureMetadata = df.schema("features").metadata
@@ -88,7 +82,6 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
     for((format, path, count) <- testDatasets) {
       val df = sqlContext.read.cifar(path.toString, format.name)
 
-      //df.rdd.partitions.length shouldEqual 10
       df.count() shouldEqual count
       df.select("label").count() shouldEqual count
       df.select("features").count() shouldEqual count
@@ -119,7 +112,7 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
     for((format, path, count) <- testDatasets) {
       format match {
         case CifarFormats._10 =>
-          val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue /*30741338L*/))
+          val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue))
             .select("label", "features")
 
           implicit val parser = new CifarReader(path, format, true)
@@ -141,7 +134,7 @@ class CifarRelationSuite extends DataSourceTest with SharedSQLContext
           df.stat.freqItems(Seq("label")).show
 
         case CifarFormats._100 =>
-          val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue /*30741338L*/))
+          val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue))
             .select("coarseLabel", "label", "features")
 
           implicit val parser = new CifarReader(path, format, true)
