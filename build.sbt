@@ -8,10 +8,9 @@ licenses += ("Apache-2.0", url("http://www.apache.org/licenses/LICENSE-2.0"))
 /********************
  * Version          *
  ********************/
-version := "0.1.0-SNAPSHOT"
 scalaVersion := "2.10.4"
 sparkVersion := "1.5.0"
-crossScalaVersions := Seq("2.10.4", "2.11.7")
+crossScalaVersions := Seq("2.10.4")
 
 /********************
  * scaladocs *
@@ -63,8 +62,24 @@ pomExtra :=
 /********************
  * sbt-release      *
  ********************/
-// releaseCrossBuild := true
-// releasePublishArtifactsAction := PgpKeys.publishSigned.value
+releaseCrossBuild := true
+releasePublishArtifactsAction := PgpKeys.publishSigned.value
+
+import ReleaseTransformations._
+releaseProcess := Seq[ReleaseStep](
+  checkSnapshotDependencies,
+  inquireVersions,
+  runClean,
+  runTest,
+  setReleaseVersion,
+  commitReleaseVersion,
+  tagRelease,
+  ReleaseStep(action = Command.process("publishSigned", _), enableCrossBuild = true),
+  setNextVersion,
+  commitNextVersion,
+  ReleaseStep(action = Command.process("sonatypeReleaseAll", _), enableCrossBuild = true),
+  pushChanges
+)
 
 /********************
  * Dependencies     *
