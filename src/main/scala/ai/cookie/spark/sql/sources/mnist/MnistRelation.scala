@@ -22,16 +22,17 @@ import java.nio.file.Paths
 
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.spark.annotation.{Experimental, AlphaComponent}
-import org.apache.spark.{SparkContext, Partition, TaskContext, Logging}
-import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.annotation.{AlphaComponent, Experimental}
+import org.apache.spark.{Partition, SparkContext, TaskContext}
+import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.{DoubleType, StructField, StructType}
 import org.apache.spark.sql.{Row, SQLContext}
-import org.apache.spark.sql.sources.{PrunedScan, BaseRelation, RelationProvider}
+import org.apache.spark.sql.sources.{BaseRelation, PrunedScan, RelationProvider}
 import ai.cookie.spark.ml.attribute.AttributeKeys
 import ai.cookie.spark.sql.sources.mapreduce.PrunedReader
 import ai.cookie.spark.sql.types.VectorUDT
+import org.apache.spark.ml.linalg.SQLDataTypes.VectorType
 import org.apache.spark.sql.types.MetadataBuilder
 
 /**
@@ -43,7 +44,7 @@ private case class MnistRelation(
                           maxRecords: Option[Int] = None,
                           maxSplitSize: Option[Long] = None)
     (@transient val sqlContext: SQLContext) extends BaseRelation
-    with PrunedScan with Logging  {
+    with PrunedScan  {
 
   private val hadoopConf = new Configuration(sqlContext.sparkContext.hadoopConfiguration)
 
@@ -60,7 +61,7 @@ private case class MnistRelation(
 
   override def schema: StructType = StructType(
     StructField("label", DoubleType, nullable = false) ::
-      StructField("features", VectorUDT(), nullable = false, featureMetadata) :: Nil)
+      StructField("features", VectorType, nullable = false, featureMetadata) :: Nil)
 
   override def buildScan(requiredColumns: Array[String]): RDD[Row] = {
     val sc = sqlContext.sparkContext

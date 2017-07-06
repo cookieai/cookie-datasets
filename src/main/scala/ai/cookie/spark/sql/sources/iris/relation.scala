@@ -18,14 +18,15 @@
 package ai.cookie.spark.sql.sources.iris
 
 import ai.cookie.spark.sql.types.VectorUDT
-import org.apache.spark.Logging
-import org.apache.spark.ml.attribute.{Attribute, NumericAttribute, AttributeGroup, NominalAttribute}
-import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.ml.attribute.{Attribute, AttributeGroup, NominalAttribute, NumericAttribute}
+import org.apache.spark.ml.linalg.Vectors
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.types.{DoubleType, StructField, StructType}
 import org.apache.spark.sql.{Row, SQLContext}
 import org.apache.spark.sql.sources._
 import ai.cookie.spark.sql.sources.libsvm.LibSVMRelation
+import org.apache.spark.ml
+import org.apache.spark.ml.linalg.SQLDataTypes.VectorType
 
 /**
   * Iris dataset as a Spark SQL relation.
@@ -51,11 +52,11 @@ private class IrisLibSVMRelation(override val path: String)
   */
 private class IrisCsvRelation(val path: String)
    (@transient override val sqlContext: SQLContext)
-  extends BaseRelation with TableScan with IrisRelation with Logging {
+  extends BaseRelation with TableScan with IrisRelation {
 
   override def schema: StructType = StructType(
     StructField("label", DoubleType, nullable = false, metadata = labelMetadata) ::
-      StructField("features", VectorUDT(), nullable = false, metadata = featuresMetadata) :: Nil)
+      StructField("features", VectorType, nullable = false, metadata = featuresMetadata) :: Nil)
 
   override def buildScan(): RDD[Row] = {
     val sc = sqlContext.sparkContext
@@ -70,7 +71,7 @@ private class IrisCsvRelation(val path: String)
             case "Iris-virginica" => 2.0
           },
           // features
-          Vectors.dense(a.slice(0,4).map(_.toDouble)))
+          ml.linalg.Vectors.dense(a.slice(0,4).map(_.toDouble)))
         case _ => sys.error("unrecognized format")
       }
     }

@@ -31,8 +31,9 @@ private[mnist] class MnistLabelReader(path: Path)(implicit conf: Configuration)
     fs.open(path)
   }
 
-  if(stream.readInt() != MnistLabelReader.HEADER_MAGIC)
+  if (stream.readInt() != MnistLabelReader.HEADER_MAGIC) {
     throw new IOException("labels database file is unreadable")
+  }
 
   val numLabels: Int = stream.readInt()
 
@@ -69,8 +70,9 @@ private[mnist] class MnistImageReader(path: Path)(implicit conf: Configuration)
     fs.open(path)
   }
 
-  if(stream.readInt() != MnistImageReader.HEADER_MAGIC)
+  if (stream.readInt() != MnistImageReader.HEADER_MAGIC) {
     throw new IOException("images database file is unreadable")
+  }
 
   val numImages: Int = stream.readInt()
 

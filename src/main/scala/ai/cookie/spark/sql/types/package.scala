@@ -18,8 +18,8 @@
 
 package ai.cookie.spark.sql
 
-import org.apache.spark.mllib.linalg.Vector
-import org.apache.spark.mllib.linalg.Vectors
+import org.apache.spark.ml.linalg.Vector
+import org.apache.spark.ml.linalg.Vectors
 
 package object types {
   private[spark] object Conversions {

@@ -25,7 +25,7 @@ import ai.cookie.spark.sql.sources.SharedSQLContext
 import ai.cookie.spark.sql.types.Conversions._
 import org.apache.hadoop.fs.Path
 import org.apache.spark.ml.attribute.{Attribute, NominalAttribute}
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.DataFrame
 import org.apache.spark.sql.types.StructField
 import org.scalatest.{FunSuite, Matchers}
@@ -34,8 +34,8 @@ class CifarRelationSuite extends FunSuite
 with SharedSQLContext with Matchers {
 
   private val testDatasets = Seq(
-    (CifarFormats._100, new Path("src/test/resources/cifar-100-binary/sample.bin"), 100),
-    (CifarFormats._10, new Path("src/test/resources/cifar-10-batches-bin/sample.bin"), 100)
+    (CifarFormats.Cifar100, new Path("src/test/resources/cifar-100-binary/sample.bin"), 100),
+    (CifarFormats.Cifar10, new Path("src/test/resources/cifar-10-batches-bin/sample.bin"), 100)
   )
 
   private def recordStream(implicit parser: CifarReader): Stream[CifarRecord] = {
@@ -65,11 +65,11 @@ with SharedSQLContext with Matchers {
       }
 
       format match {
-        case CifarFormats._10 =>
-          values(df.schema("label")) should equal(CifarFormats._10.labels)
-        case CifarFormats._100 =>
-          values(df.schema("label")) should equal(CifarFormats._100.fineLabels)
-          values(df.schema("coarseLabel")) should equal(CifarFormats._100.coarseLabels)
+        case CifarFormats.Cifar10 =>
+          values(df.schema("label")) should equal(CifarFormats.Cifar10.labels)
+        case CifarFormats.Cifar100 =>
+          values(df.schema("label")) should equal(CifarFormats.Cifar100.fineLabels)
+          values(df.schema("coarseLabel")) should equal(CifarFormats.Cifar100.coarseLabels)
       }
 
       val featureMetadata = df.schema("features").metadata
@@ -111,7 +111,7 @@ with SharedSQLContext with Matchers {
 
     for((format, path, count) <- testDatasets) {
       format match {
-        case CifarFormats._10 =>
+        case CifarFormats.Cifar10 =>
           val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue))
             .select("label", "features")
 
@@ -133,7 +133,7 @@ with SharedSQLContext with Matchers {
 
           df.stat.freqItems(Seq("label")).show
 
-        case CifarFormats._100 =>
+        case CifarFormats.Cifar100 =>
           val df = sqlContext.read.cifar(path.toString, format.name, Some(Long.MaxValue))
             .select("coarseLabel", "label", "features")
 

@@ -24,7 +24,7 @@ import ai.cookie.spark.sql.sources.SharedSQLContext
 import ai.cookie.spark.sql.types.Conversions._
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.ml.linalg.Vector
 import org.scalatest.{FunSuite, Matchers}
 
 class MnistRelationSuite extends FunSuite

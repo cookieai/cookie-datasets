@@ -53,8 +53,8 @@ private class CifarReader
   def next(): CifarRecord = {
     val row = CifarRecord(
       coarseLabel = format match {
-        case CifarFormats._100 => stream.readUnsignedByte()
-        case CifarFormats._10 => 0
+        case CifarFormats.Cifar100 => stream.readUnsignedByte()
+        case CifarFormats.Cifar10 => 0
       },
       fineLabel = stream.readUnsignedByte(),
       image = readImage match {
@@ -110,11 +110,11 @@ private object CifarFormats {
 
   sealed abstract class Format(val name: String, val recordSize: Int)
 
-  case object _10 extends Format("CIFAR-10", 1 + IMAGE_FIELD_SIZE) {
+  case object Cifar10 extends Format("CIFAR-10", 1 + IMAGE_FIELD_SIZE) {
     val labels = read("batches.meta.txt")
   }
 
-  case object _100 extends Format("CIFAR-100", 1 + 1 + IMAGE_FIELD_SIZE) {
+  case object Cifar100 extends Format("CIFAR-100", 1 + 1 + IMAGE_FIELD_SIZE) {
     val fineLabels = read("fine_label_names.txt")
     val coarseLabels = read("coarse_label_names.txt")
   }

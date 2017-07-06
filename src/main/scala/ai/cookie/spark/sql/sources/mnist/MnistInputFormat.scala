@@ -21,8 +21,7 @@ package ai.cookie.spark.sql.sources.mnist
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, FileSplit}
 import org.apache.hadoop.mapreduce.{InputSplit => HadoopInputSplit, JobContext, RecordReader => HadoopRecordReader, TaskAttemptContext}
-import org.apache.spark.Logging
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.Row
 import ai.cookie.spark.sql.sources.mapreduce.PrunedReader
 import ai.cookie.spark.sql.types.Conversions._
@@ -40,7 +39,7 @@ private class MnistInputFormat
 
 private class MnistRecordReader()
   extends HadoopRecordReader[String,Row]
-  with Logging {
+  {
 
   private var imageParser: MnistImageReader = null
   private var labelParser: MnistLabelReader = null
@@ -61,7 +60,7 @@ private class MnistRecordReader()
       .getOrElse(throw new RuntimeException("expected labelsPath"))
     imageParser = new MnistImageReader(file.getPath)
     labelParser = new MnistLabelReader(labelsPath)
-    //val recordRange = calculateRange(file, parser)
+    // val recordRange = calculateRange(file, parser)
 
     // calculate the range of records to scan, based on byte-level split information
     val start = imageParser.recordAt(file.getStart)
