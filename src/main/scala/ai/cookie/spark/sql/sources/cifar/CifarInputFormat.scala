@@ -21,13 +21,13 @@ package ai.cookie.spark.sql.sources.cifar
 import org.apache.hadoop.conf.Configuration
 import org.apache.hadoop.fs.Path
 import org.apache.hadoop.mapreduce.lib.input.{FileInputFormat, FileSplit}
-import org.apache.hadoop.mapreduce.{InputSplit => HadoopInputSplit, JobContext, RecordReader => HadoopRecordReader, TaskAttemptContext}
-import org.apache.spark.Logging
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.hadoop.mapreduce.{JobContext, TaskAttemptContext, InputSplit => HadoopInputSplit, RecordReader => HadoopRecordReader}
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.Row
 import ai.cookie.spark.sql.sources.mapreduce.PrunedReader
 import ai.cookie.spark.sql.types.Conversions._
 import org.apache.hadoop.conf.{Configuration => HadoopConfiguration}
+import org.apache.spark.mllib.util.MLUtils
 
 private class CifarInputFormat
   extends FileInputFormat[String, Row]
@@ -41,8 +41,7 @@ private class CifarInputFormat
 }
 
 private class CifarRecordReader()
-  extends HadoopRecordReader[String,Row]
-  with Logging {
+  extends HadoopRecordReader[String,Row] {
 
   private var parser: CifarReader = null
 

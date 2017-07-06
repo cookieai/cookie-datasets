@@ -17,13 +17,13 @@
 
 package ai.cookie.spark.sql.sources.libsvm
 
-import org.apache.spark.Logging
 import org.apache.spark.mllib.util.MLUtils
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.sources.{BaseRelation, RelationProvider, TableScan}
 import org.apache.spark.sql.types.{DoubleType, Metadata, StructField, StructType}
 import org.apache.spark.sql.{Row, SQLContext}
 import ai.cookie.spark.sql.types.VectorUDT
+import org.apache.spark.ml.linalg.SQLDataTypes.VectorType
 
 /**
  * LibSVMRelation provides a DataFrame representation of LibSVM formatted data.
@@ -32,7 +32,7 @@ import ai.cookie.spark.sql.types.VectorUDT
  */
 private[spark] class LibSVMRelation(val path: String, val numFeatures: Option[Int] = None)
     (@transient val sqlContext: SQLContext)
-  extends BaseRelation with TableScan with Logging {
+  extends BaseRelation with TableScan {
 
   protected def labelMetadata: Metadata = Metadata.empty
 
@@ -40,7 +40,7 @@ private[spark] class LibSVMRelation(val path: String, val numFeatures: Option[In
 
   override def schema: StructType = StructType(
     StructField("label", DoubleType, nullable = false, metadata = labelMetadata) ::
-      StructField("features", VectorUDT(), nullable = false, metadata = featuresMetadata) :: Nil)
+      StructField("features", VectorType, nullable = false, metadata = featuresMetadata) :: Nil)
 
   override def buildScan(): RDD[Row] = {
 
@@ -52,7 +52,7 @@ private[spark] class LibSVMRelation(val path: String, val numFeatures: Option[In
     }
 
     baseRdd.map(pt => {
-      Row(pt.label, pt.features.toDense)
+      Row(pt.label, pt.features.toDense.asML)
     })
   }
 

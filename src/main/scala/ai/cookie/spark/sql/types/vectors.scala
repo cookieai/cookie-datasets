@@ -17,12 +17,12 @@
 
 package ai.cookie.spark.sql.types
 
-import org.apache.spark.mllib.linalg.Vector
+import org.apache.spark.ml.linalg.Vector
 import org.apache.spark.sql.types.{DataType, SQLUserDefinedType}
 
 private[spark] object VectorUDT {
   /**
-   * Get the UDT associated with the {@code org.apache.spark.mllib.linalg.Vector} type.
+   * Get the UDT associated with the {@code org.apache.spark.ml.linalg.Vector} type.
    */
   def apply(): DataType = {
     classOf[Vector].getAnnotation(classOf[SQLUserDefinedType]).udt().newInstance()

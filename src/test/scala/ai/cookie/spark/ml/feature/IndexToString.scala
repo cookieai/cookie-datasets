@@ -18,11 +18,11 @@
 package ai.cookie.spark.ml.feature
 
 import org.apache.spark.ml.UnaryTransformer
-import org.apache.spark.ml.attribute.{NominalAttribute, Attribute}
+import org.apache.spark.ml.attribute.{Attribute, NominalAttribute}
 import org.apache.spark.ml.util.Identifiable
-import org.apache.spark.sql.DataFrame
+import org.apache.spark.sql.{DataFrame, Dataset}
 import org.apache.spark.sql.functions._
-import org.apache.spark.sql.types.{StringType, DataType}
+import org.apache.spark.sql.types.{DataType, StringType}
 
 /**
   * A transformer that maps an ML column of label indices to
@@ -41,7 +41,7 @@ class IndexToString(override val uid: String)
     throw new UnsupportedOperationException();
   }
 
-  override def transform(dataset: DataFrame): DataFrame = {
+  override def transform(dataset: Dataset[_]): DataFrame = {
     val schema = transformSchema(dataset.schema, logging = true)
 
     val values = Attribute.fromStructField(schema($(inputCol))) match {
@@ -49,8 +49,8 @@ class IndexToString(override val uid: String)
       case _ => throw new UnsupportedOperationException("input column must be a nominal column")
     }
 
-    dataset.withColumn($(outputCol),
-      callUDF((index: Double) => values(index.toInt), outputDataType, dataset($(inputCol))))
+    val toStringUdf = udf((index: Double) => values(index.toInt))
+    dataset.withColumn($(outputCol), toStringUdf(dataset($(inputCol))))
   }
 
   override protected def outputDataType: DataType = StringType

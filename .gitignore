@@ -2,3 +2,5 @@
 target/
 metastore_db/
 derby.log
+scalastyle-output.xml
+*.iml
