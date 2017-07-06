@@ -59,8 +59,8 @@ private class CifarRecordReader()
     // initialize parser
     val format = {
       CifarRecordReader.getFormat(context.getConfiguration) match {
-        case Some("CIFAR-10") => CifarFormats._10
-        case Some("CIFAR-100") => CifarFormats._100
+        case Some("CIFAR-10") => CifarFormats.Cifar10
+        case Some("CIFAR-100") => CifarFormats.Cifar100
         case other => throw new RuntimeException(s"unsupported CIFAR format '$other'")
       }
     }

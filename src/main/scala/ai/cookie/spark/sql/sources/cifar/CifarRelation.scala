@@ -44,7 +44,7 @@ private case class Cifar10Relation(val path: Path, val maxSplitSize: Option[Long
   extends CifarRelation(path, maxSplitSize)(sqlContext) {
 
   private lazy val labelMetadata = NominalAttribute.defaultAttr
-    .withName("label").withValues(CifarFormats._10.labels).toMetadata()
+    .withName("label").withValues(CifarFormats.Cifar10.labels).toMetadata()
 
   override def schema: StructType = StructType(
       StructField("label", DoubleType, nullable = false, labelMetadata) ::
@@ -62,10 +62,10 @@ private case class Cifar100Relation(val path: Path, val maxSplitSize: Option[Lon
   extends CifarRelation(path, maxSplitSize)(sqlContext) {
 
   private lazy val coarseLabelMetadata = NominalAttribute.defaultAttr
-    .withName("coarseLabel").withValues(CifarFormats._100.coarseLabels).toMetadata()
+    .withName("coarseLabel").withValues(CifarFormats.Cifar100.coarseLabels).toMetadata()
 
   private lazy val labelMetadata = NominalAttribute.defaultAttr
-    .withName("label").withValues(CifarFormats._100.fineLabels).toMetadata()
+    .withName("label").withValues(CifarFormats.Cifar100.fineLabels).toMetadata()
 
   override def schema: StructType = StructType(
     StructField("coarseLabel", DoubleType, nullable = false, coarseLabelMetadata) ::
